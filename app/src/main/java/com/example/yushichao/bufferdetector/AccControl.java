@@ -8,10 +8,12 @@ import android.util.Log;
 
 public class AccControl {
 
-    private int dataNum=500;
 
     private float[] Accs;
     private int count;
+    private static final int smooth=60;
+
+    private int dataNum=2*smooth+200;
 
     public interface AccCallback{
         void BufferDetector(float speed);
@@ -46,25 +48,24 @@ public class AccControl {
             diff[i]*=diff[i];
         }
 
-        diff=Utils.smoothFilter(data,50);
+        diff=Utils.smoothFilter(data,smooth);
         float max=0;
-        for (int i=0;i<diff.length;i++){
+        for (int i=smooth;i<diff.length;i++){
             if(diff[i]>max){
                 max=diff[i];
             }
         }
 
-        max/=10;
+        max/=5;
         int[] sign=new int[diff.length];
         for (int i=0;i<diff.length;i++){
-            if(diff[i]>0.1&&diff[i]>max){
+            if(max>0.2&&diff[i]>max){
                 sign[i]=1;
             }
         }
-
-        if (sign[100]==0&&sign[101]==1){
+        if (sign[smooth]==0&&sign[smooth+1]==1){
             int num=0;
-            for(int i=101;i<sign.length;i++){
+            for(int i=smooth+1;i<sign.length;i++){
                 if(sign[i]==1){
                     ++num;
                 }else{
@@ -72,7 +73,7 @@ public class AccControl {
                 }
             }
 
-            num-=50;
+            num-=(smooth+1);
             if (num>20&&num<120){
                 float speed=(120-num)*0.27f+3;
                 callback.BufferDetector(speed);

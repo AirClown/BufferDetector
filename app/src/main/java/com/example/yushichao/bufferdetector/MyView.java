@@ -64,13 +64,14 @@ public class MyView extends View{
 
             Paint paint1 = new Paint();
             paint1.setColor(Color.BLUE );
-            paint1.setStrokeWidth(5);
-            paint1.setTextSize(50);
+            paint1.setStrokeWidth(10);
+            paint1.setTextSize(100);
             paint1.setStyle(Paint.Style.STROKE);
+            paint1.setAlpha(100);
 
             canvas.drawLine(Width/2,0,Width/2,Height,paint1);
             canvas.drawLine(0,0,0,Height,paint1);
-            canvas.drawText(title,Width/2,50,paint1);
+            canvas.drawText(title,Width/2,150,paint1);
 
             paint1.setStrokeWidth(10);
 
