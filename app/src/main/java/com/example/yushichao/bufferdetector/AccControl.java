@@ -8,14 +8,14 @@ import android.util.Log;
 
 public class AccControl {
 
-    private int dataNum=500;
+    private int dataNum=800;
 
     private float[] Accs;
     private int count;
 
     public interface AccCallback{
         void BufferDetector(float speed);
-        void Drew(float[] data1,int[] data2);
+        void Drew(float[] data1,float[] data2);
     }
     private AccCallback callback;
 
@@ -40,42 +40,37 @@ public class AccControl {
             data[i]=Accs[j];
         }
 
-        float[] diff=Utils.diff(data);
+        float[] diff=Utils.abs(Utils.diff(data));
 
-        for(int i=0;i<diff.length;i++){
-            diff[i]*=diff[i];
-        }
+        int r=100;
+        float[] ave=new float[diff.length];
+        float sum=0;
 
-        diff=Utils.smoothFilter(data,50);
-        float max=0;
         for (int i=0;i<diff.length;i++){
-            if(diff[i]>max){
-                max=diff[i];
+            if (i<r*2){
+                sum+=diff[i];
+            }else{
+                sum+=diff[i];
+                sum-=diff[i-2*r];
+
+                ave[i-r]=sum/(r*2);
             }
         }
 
-        max/=10;
-        int[] sign=new int[diff.length];
-        for (int i=0;i<diff.length;i++){
-            if(diff[i]>0.1&&diff[i]>max){
+        for (int i=r;i<diff.length-r;i++){
+            if (diff[i]<0.5||diff[i]<ave[i]*2){
+                diff[i]=0;
+            }else{
+                diff[i]*=diff[i];
+            }
+        }
+
+        diff=Utils.smoothFilter(diff,50);
+
+        float[] sign=new float[diff.length];
+        for (int i=r;i<sign.length-r;i++){
+            if (diff[i]>ave[i]&&diff[i]>0.2){
                 sign[i]=1;
-            }
-        }
-
-        if (sign[100]==0&&sign[101]==1){
-            int num=0;
-            for(int i=101;i<sign.length;i++){
-                if(sign[i]==1){
-                    ++num;
-                }else{
-                    break;
-                }
-            }
-
-            num-=50;
-            if (num>20&&num<120){
-                float speed=(120-num)*0.27f+3;
-                callback.BufferDetector(speed);
             }
         }
 
