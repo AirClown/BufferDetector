@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void Drew(float[] data1, int[] data2) {
+        public void Drew(float[] data1, float[] data2) {
             if (mv==null) return;
             mv.setRange(data1.length);
             mv.setData(data1,data2);
@@ -52,6 +52,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         accControl=new AccControl(accCallback);
-
+        //accControl.saveData(this.getExternalFilesDir(null)+"");
     }
 }

@@ -16,7 +16,7 @@ public class MyView extends View{
 
     private int count;
     private float[] data1;
-    private int[] data2;
+    private float[] data2;
 
     private String title="";
 
@@ -40,10 +40,10 @@ public class MyView extends View{
 
         count=0;
         data1=new float[Range];
-        data2=new int[Range];
+        data2=new float[Range];
     }
 
-    public void setData(float[] data1,int[] data2){
+    public void setData(float[] data1,float[] data2){
         this.data1=data1;
         this.data2=data2;
         invalidate();
@@ -60,7 +60,6 @@ public class MyView extends View{
         if(Range>0) {
             int Width=canvas.getWidth();
             int Height=canvas.getHeight();
-
 
             Paint paint1 = new Paint();
             paint1.setColor(Color.BLUE );
