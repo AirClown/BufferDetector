@@ -6,6 +6,7 @@ import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void BufferDetector(float speed) {
             mv.setTitle("速度:"+speed);
+            Toast.makeText(MainActivity.this,"已过缓冲带,估计速度："+speed,Toast.LENGTH_SHORT).show();
         }
 
         @Override

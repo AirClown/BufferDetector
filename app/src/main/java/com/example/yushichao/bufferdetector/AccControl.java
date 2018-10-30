@@ -8,16 +8,14 @@ import android.util.Log;
 
 public class AccControl {
 
-    private int dataNum=400;
+    private int dataNum=500;
 
     private float[] Accs;
     private int count;
 
-    private MyFile file;
-
     public interface AccCallback{
         void BufferDetector(float speed);
-        void Drew(float[] data1,float[] data2);
+        void Drew(float[] data1,int[] data2);
     }
     private AccCallback callback;
 
@@ -28,67 +26,7 @@ public class AccControl {
         count=0;
     }
 
-    public void saveData(String path){
-        file=new MyFile(path,"Acc.txt");
-        file.CreateFile();
-    }
-
-    public void refreshAcc(float[] values) {
-        float acc = (float) Math.sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
-
-        if (file!=null){
-            file.WriteIntoFile(""+acc);
-        }
-        Accs[count] = acc;
-
-        float[] data = new float[Accs.length];
-        for (int i = 0, j = count; i < Accs.length; i++, j--) {
-            if (j < 0) {
-                j += Accs.length;
-            }
-            data[i] = Accs[j];
-        }
-
-        float[] diff = Utils.abs(Utils.diff(data));
-
-        int r=10;
-        float[] ave=new float[diff.length];
-
-        float sum=0;
-        for(int i=0;i<diff.length;i++){
-            if(i<2*r){
-                sum+=diff[i];
-            }else{
-                sum+=diff[i];
-                sum-=diff[i-r*2];
-
-                ave[i-r]=sum/(2*r);
-            }
-        }
-
-        float[] sign=new float[diff.length];
-
-        for(int i=0;i<diff.length;i++){
-            if (ave[i]*2<diff[i]&&diff[i]>0.5){
-                diff[i]*=diff[i];
-            }else{
-                diff[i]=0;
-            }
-        }
-
-        diff=Utils.smoothFilter(diff,50);
-        for (int i=r;i<diff.length-r;i++){
-            if (diff[i]>ave[i]&&diff[i]>0.2){
-                sign[i]=1;
-            }
-        }
-
-        callback.Drew(diff, sign);
-
-        count=(count+1)%Accs.length;
-    }
-
-    public void refreshAcc2(float[] values){
+    public void refreshAcc(float[] values){
         float acc=(float)Math.sqrt(values[0]*values[0]+values[1]*values[1]+values[2]*values[2]);
 
         Log.e("Acc",""+acc);
@@ -117,7 +55,7 @@ public class AccControl {
         }
 
         max/=10;
-        float[] sign=new float[diff.length];
+        int[] sign=new int[diff.length];
         for (int i=0;i<diff.length;i++){
             if(diff[i]>0.1&&diff[i]>max){
                 sign[i]=1;
