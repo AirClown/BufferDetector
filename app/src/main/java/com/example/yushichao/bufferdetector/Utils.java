@@ -51,4 +51,22 @@ public class Utils {
         }
         return values;
     }
+
+    public static float max(float[] values){
+        if (values.length==0) return 0;
+        float max=values[0];
+        for (float x:values){
+            if (x>max) max=x;
+        }
+        return max;
+    }
+
+    public static float min(float[] values){
+        if (values.length==0) return 0;
+        float min=values[0];
+        for (float x:values){
+            if (x<min) min=x;
+        }
+        return min;
+    }
 }

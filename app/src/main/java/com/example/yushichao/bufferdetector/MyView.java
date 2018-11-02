@@ -96,6 +96,13 @@ public class MyView extends View{
             }
             paint1.setColor(Color.RED);
             canvas.drawPath(path2,paint1);
+
+            paint1.setColor(Color.GREEN);
+            for (int i=1;i<Range-1;i++){
+                if (data2[i]>0&&data1[i]>data1[i-1]&&data1[i]>data1[i+1]){
+                    canvas.drawPoint(data1[i]*ix,iy*i,paint1);
+                }
+            }
         }
     }
 }

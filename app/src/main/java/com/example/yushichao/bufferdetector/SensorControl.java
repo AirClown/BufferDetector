@@ -38,7 +38,6 @@ public class SensorControl implements SensorEventListener {
         if (callback==null) return;
         switch (event.sensor.getType()){
             case Sensor.TYPE_LINEAR_ACCELERATION:
-                Log.e("Sensor",event.values[0]+"");
                 callback.refreshAcc(event.values);
                 break;
         }

@@ -3,6 +3,9 @@ package com.example.yushichao.bufferdetector;
 import android.graphics.Point;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by yushi on 2018/10/25.
  */
@@ -40,7 +43,6 @@ public class AccControl {
     public void refreshAcc(float[] values) {
         float acc = (float) Math.sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
 
-        //Log.e("Acc", "" + acc);
         Accs[count] = acc;
 
         if (file!=null){
@@ -80,29 +82,34 @@ public class AccControl {
         float[] sign=new float[data.length];
         for (int i=r;i<data.length-r;i++){
             if (data[i]>1.5&&data[i]>2*ave[i]&&var[i]*3>ave[i]){
-                sign[i]=20;
+                sign[i]=5;
+            }
+        }
+
+        if (sign[r*2]>0&&sign[r]==0&&sign[data.length-r-1]==0) {
+            List<Point> points = new ArrayList<>();
+            for (int i = r; i < data.length - r; i++) {
+                if (sign[i] > 0 && data[i] > data[i - 1] && data[i] > data[i + 1]) {
+                    points.add(new Point(i, 0));
+                }
+            }
+
+            if (points.size() > 2) {
+                Point[] re = Kmeans(2, points, 20);
+                if (re != null) {
+                    sign[re[0].x] = 10;
+                    sign[re[1].x] = 10;
+
+                    float speed = (float) (3 / (Math.abs(re[0].x - re[1].x) * 0.02) * 3.6);
+
+                    if (speed < 30 && speed > 3) {
+                        callback.BufferDetector(speed);
+                    }
+                }
             }
         }
 
         callback.Drew(data,sign);
-        sign=Utils.smoothFilter(sign,r);
-
-        if (sign[r]==0&&sign[sign.length-r-1]==0) {
-            int range_count=-r;
-            for (int i = r+1; i < sign.length-r; i++) {
-                if (sign[i]>0) {
-                    range_count++;
-                }else if (range_count>0){
-                    break;
-                }
-            }
-
-            if (range_count>15&&range_count<150) {
-                float speed =(float) (3.0f/(range_count*0.02f))*2.7f+3;
-                callback.BufferDetector(speed);
-            }
-
-        }
 
         count=(count+1)%Accs.length;
     }
@@ -112,31 +119,32 @@ public class AccControl {
     //points:坐标数据
     //iteration:迭代计算次数
     //返回：聚类中心
-    public static Point[] Kmeans(int k, Point[] points, int iteration){
-        if (points.length<k) return null;
+    public static Point[] Kmeans(int k, List<Point> points, int iteration){
+        if (points.size()<k) return null;
 
         //聚类中心
         Point[] centre=new Point[k];
         for(int i=0;i<centre.length;i++){
-            centre[i]=points[i];
+            int index=(int)(Math.random()*points.size());
+            centre[i]=new Point(points.get(index).x,points.get(index).y);
         }
 
         while (--iteration>0){
             //分组下标，每个数据对应聚类中心数组的下标
-            int[] index=new int[points.length];
+            int[] index=new int[points.size()];
 
             //统计每组的数据数量
             int[] count=new int[centre.length];
 
             //分组
-            for (int i=0;i<points.length;i++){
+            for (int i=0;i<points.size();i++){
                 //最小距离，-1代表没有初值
                 float min=-1;
 
                 //寻找最近的聚类中心
                 for (int j=0;j<centre.length;j++){
-                    float d=(float) Math.sqrt((centre[j].x-points[i].x)*(centre[j].x-points[i].x)+
-                            (centre[j].y-points[i].y)*(centre[j].y-points[i].y));
+                    float d=(float) Math.sqrt((centre[j].x-points.get(i).x)*(centre[j].x-points.get(i).x)+
+                            (centre[j].y-points.get(i).y)*(centre[j].y-points.get(i).y));
                     if(min<0||d<min){
                         min=d;
                         index[i]=j;
@@ -147,20 +155,15 @@ public class AccControl {
             }
 
             //更新聚类中心
-            for(int i=0;i<centre.length;i++){
-                centre[i].x=0;
-                centre[i].y=0;
-            }
-
             for (int i=0;i<index.length;i++){
-                centre[index[i]].x+=points[i].x;
-                centre[index[i]].y+=points[i].y;
+                centre[index[i]].x+=points.get(i).x;
+                centre[index[i]].y+=points.get(i).y;
             }
 
             for(int i=0;i<centre.length;i++){
                 if (count[i]==0) continue;
-                centre[i].x/=count[i];
-                centre[i].y/=count[i];
+                centre[i].x/=(count[i]+1);
+                centre[i].y/=(count[i]+1);
             }
         }
 
