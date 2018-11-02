@@ -74,7 +74,7 @@ public class MyView extends View{
 
             paint1.setStrokeWidth(10);
 
-            float ix=(float)(Width-Width/20)/5;
+            float ix=(float)(Width-Width/20)/10;
             float iy=(float)Height/Range;
 
             Path path=new Path();
